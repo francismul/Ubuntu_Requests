@@ -56,7 +56,6 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          cmdline-tools-version: '11.0'
           packages: |
             platform-tools
             build-tools;34.0.0
@@ -78,8 +77,11 @@ jobs:
       - name: Accept Android SDK licenses
         run: |
           echo "Accepting Android SDK licenses..."
-          # Try multiple possible sdkmanager locations
-          if [ -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
+          # Try the preinstalled sdkmanager first
+          if [ -f "$ANDROID_HOME/cmdline-tools/9.0/bin/sdkmanager" ]; then
+            echo "Using preinstalled cmdline-tools/9.0/bin/sdkmanager"
+            yes | $ANDROID_HOME/cmdline-tools/9.0/bin/sdkmanager --licenses
+          elif [ -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
             echo "Using cmdline-tools/latest/bin/sdkmanager"
             yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
           elif [ -f "$ANDROID_HOME/tools/bin/sdkmanager" ]; then
