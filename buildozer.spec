@@ -9,11 +9,8 @@ package.name = ubuntuimagefetcher
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.ubuntuimagefetcher
 
-# (str) Source code where the main.py live
+# (str) Source code where the gui.py live
 source.dir = .
-
-# (str) Main Python file (entry point)
-source.main = gui.py
 
 # (list) Source files to include (let empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas
@@ -36,7 +33,7 @@ version = 0.1
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
-# version.filename = %(source.dir)s/main.py
+# version.filename = %(source.dir)s/gui.py
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
@@ -104,16 +101,13 @@ android.permissions = android.permission.INTERNET, android.permission.WRITE_EXTE
 #android.features = android.hardware.usb.host
 
 # (int) Target Android API, should be as high as possible.
-android.api = 34
+#android.api = 31
 
 # (int) Minimum API your APK / AAB will support.
-android.minapi = 21
+#android.minapi = 21
 
 # (int) Android SDK version to use
-android.sdk = 34
-
-# (str) Android NDK version to use
-android.ndk = 25.1.8937393
+#android.sdk = 20
 
 # (str) Android NDK version to use
 #android.ndk = 23b
