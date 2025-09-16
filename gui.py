@@ -150,7 +150,8 @@ class SinglePhotoView(MDScreen):
         )
 
         # Image with overlay container
-        image_overlay_container = MDBoxLayout(orientation='vertical', size_hint=(1, 0.9))
+        image_overlay_container = MDBoxLayout(
+            orientation='vertical', size_hint=(1, 0.9))
 
         self.image_widget = FitImage(
             source="",
@@ -228,11 +229,12 @@ class SinglePhotoView(MDScreen):
     def update_navigation_buttons(self):
         if self.current_image_path and self.app_instance.save_directory:
             image_files = [f for f in os.listdir(self.app_instance.save_directory)
-                          if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'))]
+                           if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'))]
             image_files.sort()
 
             try:
-                current_index = image_files.index(os.path.basename(self.current_image_path))
+                current_index = image_files.index(
+                    os.path.basename(self.current_image_path))
                 self.prev_btn.disabled = current_index == 0
                 self.next_btn.disabled = current_index == len(image_files) - 1
             except ValueError:
@@ -242,13 +244,15 @@ class SinglePhotoView(MDScreen):
     def show_next(self, *args):
         if self.current_image_path and self.app_instance.save_directory:
             image_files = [f for f in os.listdir(self.app_instance.save_directory)
-                          if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'))]
+                           if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'))]
             image_files.sort()
 
             try:
-                current_index = image_files.index(os.path.basename(self.current_image_path))
+                current_index = image_files.index(
+                    os.path.basename(self.current_image_path))
                 if current_index < len(image_files) - 1:
-                    next_image = os.path.join(self.app_instance.save_directory, image_files[current_index + 1])
+                    next_image = os.path.join(
+                        self.app_instance.save_directory, image_files[current_index + 1])
                     self.set_image(next_image)
             except ValueError:
                 pass
@@ -256,13 +260,15 @@ class SinglePhotoView(MDScreen):
     def show_previous(self, *args):
         if self.current_image_path and self.app_instance.save_directory:
             image_files = [f for f in os.listdir(self.app_instance.save_directory)
-                          if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'))]
+                           if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'))]
             image_files.sort()
 
             try:
-                current_index = image_files.index(os.path.basename(self.current_image_path))
+                current_index = image_files.index(
+                    os.path.basename(self.current_image_path))
                 if current_index > 0:
-                    prev_image = os.path.join(self.app_instance.save_directory, image_files[current_index - 1])
+                    prev_image = os.path.join(
+                        self.app_instance.save_directory, image_files[current_index - 1])
                     self.set_image(prev_image)
             except ValueError:
                 pass
@@ -349,7 +355,7 @@ class GalleryScreen(MDScreen):
             return
 
         image_files = [f for f in os.listdir(self.app_instance.save_directory)
-                      if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'))]
+                       if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'))]
 
         if not image_files:
             empty_label = MDLabel(
@@ -365,7 +371,8 @@ class GalleryScreen(MDScreen):
         image_files.sort(reverse=True)  # Show newest first
 
         for filename in image_files:
-            image_path = os.path.join(self.app_instance.save_directory, filename)
+            image_path = os.path.join(
+                self.app_instance.save_directory, filename)
             card = GalleryCard(image_path, self.app_instance)
             self.gallery_layout.add_widget(card)
 
@@ -532,7 +539,8 @@ class MainScreen(MDScreen):
         try:
             # Basic URL validation
             if not url.startswith(('http://', 'https://')):
-                raise ValueError("Invalid URL format - must start with http:// or https://")
+                raise ValueError(
+                    "Invalid URL format - must start with http:// or https://")
 
             # Additional URL validation
             try:
@@ -553,15 +561,19 @@ class MainScreen(MDScreen):
             except requests.exceptions.Timeout:
                 raise ValueError("Connection timed out - please try again")
             except requests.exceptions.ConnectionError:
-                raise ValueError("Network connection failed - check your internet")
+                raise ValueError(
+                    "Network connection failed - check your internet")
             except requests.exceptions.HTTPError as e:
                 if r and hasattr(r, 'status_code'):
                     if r.status_code == 404:
-                        raise ValueError("Image not found (404) - check the URL")
+                        raise ValueError(
+                            "Image not found (404) - check the URL")
                     elif r.status_code == 403:
-                        raise ValueError("Access forbidden (403) - image may be private")
+                        raise ValueError(
+                            "Access forbidden (403) - image may be private")
                     elif r.status_code >= 500:
-                        raise ValueError("Server error - please try again later")
+                        raise ValueError(
+                            "Server error - please try again later")
                     else:
                         raise ValueError(f"HTTP error {r.status_code}")
                 else:
@@ -577,14 +589,16 @@ class MainScreen(MDScreen):
                 raise ValueError("Could not determine content type")
 
             if "image" not in content_type:
-                raise ValueError(f"Not an image - detected type: {content_type}")
+                raise ValueError(
+                    f"Not an image - detected type: {content_type}")
 
             # Check content length
             content_length = r.headers.get("content-length")
             if content_length:
                 size_mb = int(content_length) / (1024 * 1024)
-                if size_mb > 50:  # 50MB limit
-                    raise ValueError(".1f")
+                if size_mb > 100:  # 100MB limit
+                    raise ValueError(
+                        f"File too large: {size_mb:.1f} MB exceeds 100MB limit")
 
             # Success - show preview
             self._show_preview_success(url)
@@ -719,7 +733,8 @@ class UbuntuImageFetcherApp(MDApp):
                           spacing=dp(10), padding=dp(15))
 
         # Image container with overlay
-        image_container = MDBoxLayout(orientation="vertical", size_hint=(1, 0.8))
+        image_container = MDBoxLayout(
+            orientation="vertical", size_hint=(1, 0.8))
 
         img = FitImage(source=url, size_hint=(1, 1))
         image_container.add_widget(img)
@@ -838,7 +853,8 @@ class UbuntuImageFetcherApp(MDApp):
     def _sanitize_filename(self, url, content_type=""):
         """Generate Ubuntu-themed filename with random numbers"""
         # Generate random string of numbers (6-8 digits)
-        random_numbers = ''.join(random.choices(string.digits, k=random.randint(6, 8)))
+        random_numbers = ''.join(random.choices(
+            string.digits, k=random.randint(6, 8)))
 
         # Get file extension from content type
         extension = self._get_extension_from_content_type(content_type)
@@ -871,7 +887,7 @@ class UbuntuImageFetcherApp(MDApp):
     def update_stats(self):
         if self.save_directory and os.path.exists(self.save_directory):
             image_files = [f for f in os.listdir(self.save_directory)
-                          if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'))]
+                           if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'))]
 
             total_size = 0
             for filename in image_files:

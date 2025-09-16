@@ -8,8 +8,6 @@ built with respect for connections and graceful error handling.
 
 from ubuntu_fetcher_core import UbuntuImageFetcher
 
-from ubuntu_fetcher_core import UbuntuImageFetcher
-
 
 def interactive_mode():
     """Interactive mode embodying Ubuntu dialogue."""
