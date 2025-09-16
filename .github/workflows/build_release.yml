@@ -51,7 +51,16 @@ jobs:
 
       - name: Accept Android SDK Licenses
         run: |
+          echo "Accepting all Android SDK licenses..."
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          
+          # Ensure build-tools and additional components are installed
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+            "build-tools;33.0.2" \
+            "platform-tools" \
+            "platforms;android-33" || true
+          
+          echo "SDK license acceptance and installation complete"
 
       - name: Cache .buildozer and .gradle
         uses: actions/cache@v4
@@ -66,7 +75,16 @@ jobs:
       - name: Build debug APK
         run: |
           export ANDROID_SDK_ROOT=$ANDROID_HOME
+          export ANDROID_HOME=$ANDROID_HOME
           echo "Building with ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+          echo "Building with ANDROID_HOME: $ANDROID_HOME"
+          
+          # Verify SDK setup
+          echo "Checking Android SDK structure..."
+          ls -la $ANDROID_HOME/build-tools/ || echo "Build tools directory not found"
+          ls -la $ANDROID_HOME/platforms/ || echo "Platforms directory not found"
+          
+          # Build the APK
           buildozer android debug
 
       - name: Upload APK
