@@ -34,7 +34,26 @@ pip install -r requirements.txt
 
 ## 💡 Usage
 
-### Interactive Mode (Recommended)
+### GUI Application (Mobile-Friendly)
+
+For a beautiful, touch-friendly experience with Ubuntu philosophy integrated throughout:
+
+```bash
+python gui.py
+```
+
+The GUI features:
+- **Mobile-optimized design** with large touch targets
+- **Ubuntu-themed interface** with philosophy quotes
+- **Input field at the top** for easy access
+- **Community-focused messaging** throughout the app
+- **Dynamic backgrounds** with Ubuntu-inspired colors
+- **Gallery view** for browsing downloaded images
+- **Navigation arrows** in single photo view (hover/tap to show)
+- **Shared core functionality** with terminal version
+- **Custom folder selection** on first run with persistent settings
+
+### Interactive Mode (Command Line)
 
 Run the script and follow the prompts:
 
@@ -80,7 +99,9 @@ image.jpg: 100%|██████████| 2.45M/2.45M [00:01<00:00, 1.85MB
 
 ```
 Ubuntu_Requests/
-├── index.py              # Main application script
+├── index.py              # Command-line image fetcher
+├── gui.py                # Mobile-friendly GUI application
+├── ubuntu_fetcher_core.py # Shared core functionality
 ├── requirements.txt      # Python dependencies
 ├── README.md            # This file
 └── Fetched_Images/      # Directory for downloaded images
@@ -88,6 +109,38 @@ Ubuntu_Requests/
     ├── ubuntu_image_1758032103.jpg
     └── ...
 ```
+
+## ⚙️ Configuration
+
+The application creates a configuration file (`ubuntu_fetcher_config.json`) to remember your download folder preference:
+
+```json
+{
+  "save_directory": "/path/to/your/download/folder"
+}
+```
+
+### First-Time Setup
+
+When you run the GUI application for the first time:
+1. A folder selection dialog will appear
+2. Choose your preferred download location or use the default
+3. Your choice is saved and remembered for future sessions
+4. You can change the folder anytime by deleting the config file
+
+## 🔧 Architecture
+
+The project uses a **shared core architecture**:
+
+- **`ubuntu_fetcher_core.py`**: Contains the main `UbuntuImageFetcher` class with all downloading logic
+- **`index.py`**: Terminal interface that imports and uses the core functionality
+- **`gui.py`**: KivyMD GUI application that also imports the shared core
+
+This ensures:
+- **Code reusability** between terminal and GUI versions
+- **Consistent behavior** across both interfaces
+- **Easier maintenance** with centralized logic
+- **Ubuntu philosophy** consistently applied throughout
 
 ## 🔧 How It Works
 
