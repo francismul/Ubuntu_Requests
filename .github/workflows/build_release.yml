@@ -1,0 +1,123 @@
+name: Build Android APK
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git zip unzip openjdk-17-jdk python3-pip \
+            build-essential libffi-dev libssl-dev \
+            libgl1-mesa-dev libgles2-mesa-dev \
+            libncurses5 libstdc++6 \
+            pkg-config autoconf automake cmake \
+            zlib1g zlib1g-dev \
+            libgstreamer1.0-dev gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Install Buildozer
+        run: |
+          pip install --upgrade pip setuptools wheel cython
+          pip install buildozer
+
+      - name: Cache .buildozer and .gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            .buildozer
+            ~/.gradle
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec', 'requirements.txt', 'gui.py') }}
+          restore-keys: |
+            ${{ runner.os }}-buildozer-
+
+      - name: Clean previous builds
+        run: |
+          rm -rf bin/
+          buildozer android clean || true
+
+      - name: Verify Buildozer configuration
+        run: |
+          buildozer --help
+          buildozer version
+
+      - name: Build debug APK
+        run: |
+          buildozer android debug
+        continue-on-error: false
+
+      - name: List build output
+        run: |
+          ls -la bin/ || echo "No bin directory found"
+          find . -name "*.apk" -o -name "*.aab" || echo "No APK/AAB files found"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ubuntu-image-fetcher-apk
+          path: |
+            bin/*.apk
+            bin/*.aab
+        if: always()
+
+  release:
+    needs: build
+    runs-on: ubuntu-22.04
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Download APK from build
+        uses: actions/download-artifact@v4
+        with:
+          name: ubuntu-image-fetcher-apk
+          path: ./bin
+
+      - name: Verify APK exists
+        run: |
+          ls -la ./bin/
+          if [ ! -f ./bin/*.apk ] && [ ! -f ./bin/*.aab ]; then
+            echo "No APK or AAB files found!"
+            exit 1
+          fi
+
+      - name: Create Pre-Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: nightly-${{ github.run_number }}
+          name: "Nightly Build ${{ github.run_number }}"
+          body: |
+            Automated debug APK build for testing.
+
+            ## Build Information
+            - Commit: ${{ github.sha }}
+            - Branch: ${{ github.ref }}
+            - Build: ${{ github.run_number }}
+            - Date: ${{ github.event.head_commit.timestamp }}
+
+            ## Installation
+            Download the APK file and install it on your Android device.
+          draft: false
+          prerelease: true
+          files: ./bin/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
