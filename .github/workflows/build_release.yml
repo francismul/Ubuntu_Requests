@@ -56,11 +56,7 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: |
-            platform-tools
-            build-tools;34.0.0
-            platforms;android-34
-            ndk;25.1.8937393
+          packages: platform-tools build-tools;34.0.0 platforms;android-34 ndk;25.1.8937393
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
 
@@ -77,8 +73,11 @@ jobs:
       - name: Accept Android SDK licenses
         run: |
           echo "Accepting Android SDK licenses..."
-          # Try the preinstalled sdkmanager first
-          if [ -f "$ANDROID_HOME/cmdline-tools/9.0/bin/sdkmanager" ]; then
+          # Try the actual sdkmanager being used (16.0 based on error)
+          if [ -f "$ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager" ]; then
+            echo "Using cmdline-tools/16.0/bin/sdkmanager"
+            yes | $ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager --licenses
+          elif [ -f "$ANDROID_HOME/cmdline-tools/9.0/bin/sdkmanager" ]; then
             echo "Using preinstalled cmdline-tools/9.0/bin/sdkmanager"
             yes | $ANDROID_HOME/cmdline-tools/9.0/bin/sdkmanager --licenses
           elif [ -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
@@ -100,7 +99,11 @@ jobs:
           ls -la $ANDROID_HOME/ || echo "ANDROID_HOME not found"
           
           echo "Checking for installed packages..."
-          if [ -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
+          if [ -f "$ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager" ]; then
+            $ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager --list_installed | head -20
+          elif [ -f "$ANDROID_HOME/cmdline-tools/9.0/bin/sdkmanager" ]; then
+            $ANDROID_HOME/cmdline-tools/9.0/bin/sdkmanager --list_installed | head -20
+          elif [ -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
             $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list_installed | head -20
           elif [ -f "$ANDROID_HOME/tools/bin/sdkmanager" ]; then
             $ANDROID_HOME/tools/bin/sdkmanager --list_installed | head -20
