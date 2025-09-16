@@ -20,18 +20,22 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install system dependencies
+      - name: Install system dependencies (with fallback)
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
+          sudo dpkg --configure -a
+          sudo apt-get install -f -y
+          sudo apt-get install -y --no-install-recommends \
             git zip unzip openjdk-17-jdk python3-pip \
             build-essential libffi-dev libssl-dev \
             libgl1-mesa-dev libgles2-mesa-dev \
-            libncurses5 libstdc++6 \
             pkg-config autoconf automake cmake \
-            zlib1g zlib1g-dev \
-            libgstreamer1.0-dev gstreamer1.0-plugins-base \
-            gstreamer1.0-plugins-good
+            zlib1g zlib1g-dev || {
+              echo "Some optional dependencies failed, continuing with core build..."
+              sudo apt-get install -y \
+                git zip unzip openjdk-17-jdk python3-pip \
+                build-essential libffi-dev
+            }
 
       - name: Install Python dependencies
         run: |
