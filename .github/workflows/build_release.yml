@@ -30,16 +30,19 @@ jobs:
             pkg-config autoconf automake cmake \
             zlib1g zlib1g-dev
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: platform-tools build-tools;33.0.2 platforms;android-33
-
       - name: Set up Java 17
         run: |
           echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
           echo "$JAVA_HOME_17_X64/bin" >> $GITHUB_PATH
           java -version
+          echo "Java setup complete"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools build-tools;33.0.2 platforms;android-33
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}
 
       - name: Install Buildozer
         run: |
