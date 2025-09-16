@@ -30,10 +30,25 @@ jobs:
             pkg-config autoconf automake cmake \
             zlib1g zlib1g-dev
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools build-tools;33.0.2 platforms;android-33
+
+      - name: Set up Java 17
+        run: |
+          echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
+          echo "$JAVA_HOME_17_X64/bin" >> $GITHUB_PATH
+          java -version
+
       - name: Install Buildozer
         run: |
           pip install --upgrade pip setuptools wheel cython
           pip install buildozer
+
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Cache .buildozer and .gradle
         uses: actions/cache@v4
@@ -45,27 +60,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildozer-
 
-      - name: Install Android SDK packages
-        run: |
-          sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk \
-            "platform-tools" \
-            "platforms;android-33" \
-            "build-tools;33.0.2"
-
-      - name: Accept Android SDK Licenses
-        run: |
-          yes | sdkmanager --licenses || true
-
       - name: Build debug APK
         run: |
-            buildozer android debug
+          export ANDROID_SDK_ROOT=$ANDROID_HOME
+          echo "Building with ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+          buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-            name: ubuntu-image-fetcher-apk
-            path: bin/*.apk
-
+          name: ubuntu-image-fetcher-apk
+          path: bin/*.apk
 
   release:
     needs: build
