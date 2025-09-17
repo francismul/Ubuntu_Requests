@@ -23,14 +23,31 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            git zip unzip openjdk-17-jdk python3-pip \
-            build-essential libffi-dev libssl-dev \
-            libgl1-mesa-dev libgles2-mesa-dev \
-            libncurses5 libstdc++6 \
-            pkg-config autoconf automake cmake \
-            zlib1g zlib1g-dev \
-            python3-dev python3-distutils \
-            cython3
+            ant \
+            autoconf \
+            automake \
+            ccache \
+            cmake \
+            g++ \
+            gcc \
+            git \
+            lbzip2 \
+            libffi-dev \
+            libltdl-dev \
+            libtool \
+            libssl-dev \
+            make \
+            openjdk-17-jdk \
+            patch \
+            pkg-config \
+            python3 \
+            python3-dev \
+            python3-pip \
+            python3-venv \
+            sudo \
+            unzip \
+            wget \
+            zip
 
       - name: Set up Java 17
         run: |
@@ -42,14 +59,15 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: platform-tools build-tools;33.0.2 platforms;android-33 ndk;25.2.9519653
+          packages: platform-tools build-tools;28.0.3 platforms;android-27 ndk;25b
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
 
-      - name: Install Buildozer
+      - name: Install Buildozer and p4a
         run: |
           pip install --upgrade pip setuptools wheel
           pip install Cython==0.29.36
+          pip install python-for-android
           pip install buildozer
 
       - name: Accept Android SDK Licenses
@@ -57,16 +75,26 @@ jobs:
           echo "Accepting all Android SDK licenses..."
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
           
-          # Ensure build-tools and additional components are installed
+          # Ensure build-tools and additional components are installed (using p4a recommended versions)
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
-            "build-tools;33.0.2" \
+            "build-tools;28.0.3" \
             "platform-tools" \
-            "platforms;android-33" \
-            "ndk;25.2.9519653" || true
+            "platforms;android-27" \
+            "ndk;25b" || true
+          
+          # Create legacy SDK tools directory structure for buildozer compatibility
+          sudo mkdir -p $ANDROID_HOME/tools/bin
+          sudo ln -sf $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager $ANDROID_HOME/tools/bin/sdkmanager
+          sudo ln -sf $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager $ANDROID_HOME/tools/bin/avdmanager
           
           # Verify platform installation
-          echo "Verifying Android API 33 installation..."
+          echo "Verifying Android API 27 installation..."
           ls -la $ANDROID_HOME/platforms/ || echo "No platforms directory"
+          
+          # Verify SDK manager symlink
+          echo "Checking SDK manager paths..."
+          ls -la $ANDROID_HOME/tools/bin/sdkmanager || echo "Legacy sdkmanager path not found"
+          ls -la $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager || echo "New sdkmanager path not found"
           
           echo "SDK license acceptance and installation complete"
 
@@ -82,21 +110,21 @@ jobs:
 
       - name: Build debug APK
         run: |
-          export ANDROID_SDK_ROOT=$ANDROID_HOME
-          export ANDROID_HOME=$ANDROID_HOME
-          export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/25.2.9519653
-          export CYTHON_VERSION=0.29.36
-          export ANDROIDAPI="33"
-          export ANDROIDMINAPI="21"
-          export ANDROIDNDK="$ANDROID_HOME/ndk/25.2.9519653"
+          # Set environment variables as per p4a documentation
           export ANDROIDSDK="$ANDROID_HOME"
+          export ANDROIDNDK="$ANDROID_HOME/ndk/25b"
+          export ANDROIDAPI="27"
+          export NDKAPI="21"
+          export ANDROIDNDKVER="25b"
+          export ANDROID_SDK_ROOT=$ANDROID_HOME
+          export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/25b
           
-          echo "Building with ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-          echo "Building with ANDROID_HOME: $ANDROID_HOME"
-          echo "Building with ANDROID_NDK_ROOT: $ANDROID_NDK_ROOT"
-          echo "Building with ANDROIDAPI: $ANDROIDAPI"
-          echo "Building with ANDROIDSDK: $ANDROIDSDK"
-          echo "Using Cython version: $CYTHON_VERSION"
+          echo "Building with p4a recommended environment variables:"
+          echo "ANDROIDSDK: $ANDROIDSDK"
+          echo "ANDROIDNDK: $ANDROIDNDK"
+          echo "ANDROIDAPI: $ANDROIDAPI"
+          echo "NDKAPI: $NDKAPI"
+          echo "ANDROIDNDKVER: $ANDROIDNDKVER"
           
           # Verify SDK setup
           echo "Checking Android SDK structure..."
@@ -104,19 +132,27 @@ jobs:
           ls -la $ANDROID_HOME/platforms/ || echo "Platforms directory not found"
           ls -la $ANDROID_HOME/ndk/ || echo "NDK directory not found"
           
-          # Check if API 33 platform exists
-          if [ -d "$ANDROID_HOME/platforms/android-33" ]; then
-            echo "✓ Android API 33 platform found"
+          # Check if API 27 platform exists (recommended by p4a)
+          if [ -d "$ANDROID_HOME/platforms/android-27" ]; then
+            echo "✓ Android API 27 platform found"
           else
-            echo "✗ Android API 33 platform NOT found"
+            echo "✗ Android API 27 platform NOT found"
             echo "Available platforms:"
             ls -la $ANDROID_HOME/platforms/ || echo "No platforms found"
+          fi
+          
+          # Verify SDK manager is accessible
+          echo "Verifying SDK manager accessibility..."
+          if [ -f "$ANDROID_HOME/tools/bin/sdkmanager" ]; then
+            echo "✓ Legacy SDK manager path found"
+          else
+            echo "✗ Legacy SDK manager path NOT found"
           fi
           
           # Clean any previous builds
           rm -rf .buildozer/android/platform/build-*
           
-          # Build the APK
+          # Build the APK using buildozer
           buildozer android debug
 
       - name: Upload APK
