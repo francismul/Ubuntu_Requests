@@ -108,7 +108,7 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-22.04
-    if: github.ref == 'refs/heads/main'
+    if: always() && needs.build.result == 'success'
     steps:
       - name: Download APK from build
         uses: actions/download-artifact@v4
@@ -119,9 +119,21 @@ jobs:
       - name: Create Pre-Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: nightly-${{ github.run_number }}
-          name: "Nightly Build ${{ github.run_number }}"
-          body: "Automated debug APK build for testing."
+          tag_name: nightly-${{ github.run_number }}-${{ github.event.pull_request.number || 'main' }}
+          name: "Nightly Build ${{ github.run_number }} - ${{ github.head_ref || github.ref_name }}"
+          body: |
+            Automated debug APK build for testing.
+
+            ## Build Information
+            - Branch: ${{ github.head_ref || github.ref_name }}
+            - Commit: ${{ github.sha }}
+            - Run Number: ${{ github.run_number }}
+            - Event: ${{ github.event_name }}
+            
+            ## Installation
+            Download the APK file and install it on your Android device.
+            
+            **Note**: This is a debug build for testing purposes.
           draft: false
           prerelease: true
           files: ./bin/*.apk
