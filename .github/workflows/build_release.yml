@@ -64,6 +64,10 @@ jobs:
             "platforms;android-33" \
             "ndk;25.2.9519653" || true
           
+          # Verify platform installation
+          echo "Verifying Android API 33 installation..."
+          ls -la $ANDROID_HOME/platforms/ || echo "No platforms directory"
+          
           echo "SDK license acceptance and installation complete"
 
       - name: Cache .buildozer and .gradle
@@ -82,9 +86,16 @@ jobs:
           export ANDROID_HOME=$ANDROID_HOME
           export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/25.2.9519653
           export CYTHON_VERSION=0.29.36
+          export ANDROIDAPI="33"
+          export ANDROIDMINAPI="21"
+          export ANDROIDNDK="$ANDROID_HOME/ndk/25.2.9519653"
+          export ANDROIDSDK="$ANDROID_HOME"
+          
           echo "Building with ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
           echo "Building with ANDROID_HOME: $ANDROID_HOME"
           echo "Building with ANDROID_NDK_ROOT: $ANDROID_NDK_ROOT"
+          echo "Building with ANDROIDAPI: $ANDROIDAPI"
+          echo "Building with ANDROIDSDK: $ANDROIDSDK"
           echo "Using Cython version: $CYTHON_VERSION"
           
           # Verify SDK setup
@@ -92,6 +103,15 @@ jobs:
           ls -la $ANDROID_HOME/build-tools/ || echo "Build tools directory not found"
           ls -la $ANDROID_HOME/platforms/ || echo "Platforms directory not found"
           ls -la $ANDROID_HOME/ndk/ || echo "NDK directory not found"
+          
+          # Check if API 33 platform exists
+          if [ -d "$ANDROID_HOME/platforms/android-33" ]; then
+            echo "✓ Android API 33 platform found"
+          else
+            echo "✗ Android API 33 platform NOT found"
+            echo "Available platforms:"
+            ls -la $ANDROID_HOME/platforms/ || echo "No platforms found"
+          fi
           
           # Clean any previous builds
           rm -rf .buildozer/android/platform/build-*
