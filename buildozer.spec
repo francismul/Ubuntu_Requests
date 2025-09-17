@@ -9,8 +9,11 @@ package.name = ubuntuimagefetcher
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.ubuntuimagefetcher
 
-# (str) Source code where the gui.py live
+# (str) Source code where the main.py live
 source.dir = .
+
+# (str) Main Python file (entry point)
+source.main = gui.py
 
 # (list) Source files to include (let empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas
@@ -37,7 +40,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,kivymd,requests
+requirements = python3,kivy==2.1.0,kivymd,requests,pyjnius
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
