@@ -59,7 +59,7 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: platform-tools build-tools;28.0.3 platforms;android-27 ndk;25b
+          packages: platform-tools build-tools;28.0.3 platforms;android-27 ndk;25.2.9519653
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
 
@@ -80,7 +80,7 @@ jobs:
             "build-tools;28.0.3" \
             "platform-tools" \
             "platforms;android-27" \
-            "ndk;25b" || true
+            "ndk;25.2.9519653" || true
           
           # Create legacy SDK tools directory structure for buildozer compatibility
           sudo mkdir -p $ANDROID_HOME/tools/bin
@@ -112,12 +112,12 @@ jobs:
         run: |
           # Set environment variables as per p4a documentation
           export ANDROIDSDK="$ANDROID_HOME"
-          export ANDROIDNDK="$ANDROID_HOME/ndk/25b"
+          export ANDROIDNDK="$ANDROID_HOME/ndk/25.2.9519653"
           export ANDROIDAPI="27"
           export NDKAPI="21"
-          export ANDROIDNDKVER="25b"
+          export ANDROIDNDKVER="25.2.9519653"
           export ANDROID_SDK_ROOT=$ANDROID_HOME
-          export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/25b
+          export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/25.2.9519653
           
           echo "Building with p4a recommended environment variables:"
           echo "ANDROIDSDK: $ANDROIDSDK"
