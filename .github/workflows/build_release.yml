@@ -13,12 +13,12 @@ on:
   # Build and publish when pushing a tag like v1.2.3
   push:
     tags:
-      - 'v*'
+      - "v*"
 
   pull_request:
 
 permissions:
-  contents: write  # needed to create releases and upload assets
+  contents: write # needed to create releases and upload assets
 
 jobs:
   build-android:
@@ -37,35 +37,36 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
-      - name: Install system dependencies (Buildozer docs)
+      - name: Install system dependencies (Buildozer official)
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-              ant \
-              autoconf \
-              automake \
-              ccache \
-              cmake \
-              g++ \
-              gcc \
-              git \ 
-              zip \ 
-              unzip \ 
-              openjdk-17-jdk \ 
-              python3-pip \ 
-              autoconf \ 
-              libtool \ 
-              pkg-config \ 
-              zlib1g-dev \ 
-              libncurses5-dev \ 
-              libncursesw5-dev \ 
-              libtinfo5 \ 
-              cmake \ 
-              libffi-dev \ 
-              libssl-dev \
-              unzip wget
+            git \
+            zip \
+            unzip \
+            openjdk-17-jdk \
+            python3-pip \
+            autoconf \
+            libtool \
+            pkg-config \
+            zlib1g-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libtinfo5 \
+            cmake \
+            libffi-dev \
+            libssl-dev
+
+      - name: Install optional extras (non-fatal)
+        run: |
+          sudo apt-get install -y \
+            automake \
+            ccache \
+            gcc \
+            g++ \
+          || true
 
       - name: Cache Buildozer and Gradle
         uses: actions/cache@v4
