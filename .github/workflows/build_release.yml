@@ -86,17 +86,27 @@ jobs:
           pip install --upgrade pip wheel setuptools Cython==0.29.33
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Install Android SDK Command Line Tools
+      - name: Install Android SDK Command Line Tools (fixed)
         run: |
-          mkdir -p /usr/local/lib/android/sdk/cmdline-tools
-          cd /usr/local/lib/android/sdk/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-          unzip commandlinetools-linux-*_latest.zip
-          rm commandlinetools-linux-*_latest.zip
-          mkdir -p /usr/local/lib/android/sdk/cmdline-tools/latest
-          mv cmdline-tools/* /usr/local/lib/android/sdk/cmdline-tools/latest/
+          set -e
+          SDK_DIR=/usr/local/lib/android/sdk/cmdline-tools
+          mkdir -p "$SDK_DIR"
+          cd "$SDK_DIR"
+
+          # Download latest commandline tools
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+          unzip -q cmdline-tools.zip -d temp
+          rm cmdline-tools.zip
+
+          # Clean up old 'latest' if it exists
+          rm -rf "$SDK_DIR/latest"
+          mkdir -p "$SDK_DIR/latest"
+
+          # Move extracted files into 'latest'
+          mv temp/cmdline-tools/* "$SDK_DIR/latest/"
+          rm -rf temp
           yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=/usr/local/lib/android/sdk "platform-tools" "platforms;android-33" "build-tools;33.0.2"
-          
+
       - name: Add Android cmdline-tools to PATH
         run: |
           echo "PATH=/usr/local/lib/android/sdk/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
