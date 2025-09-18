@@ -44,8 +44,13 @@ jobs:
           sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get install -y \
-              build-essential \
+              ant \
+              autoconf \
+              automake \
               ccache \
+              cmake \
+              g++ \
+              gcc \
               git \ 
               zip \ 
               unzip \ 
